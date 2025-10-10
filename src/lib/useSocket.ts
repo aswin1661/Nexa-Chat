@@ -1,28 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { initSocket, getSocket, disconnectSocket } from './socket'
+import type { Message, SessionUser } from './types'
+import type { Session } from 'next-auth'
 
-interface Message {
-  id: string
-  content: string
-  createdAt: string
-  sentAt?: string
-  deliveredAt?: string
-  readAt?: string
-  read: boolean
-  sender: {
-    id: string
-    name: string
-    username: string
-    email: string
-  }
-  receiver: {
-    id: string
-    name: string
-    username: string
-    email: string
-  }
-}
+// Remove the Message interface since it's imported
 
 export const useSocket = () => {
   const { data: session } = useSession()
@@ -35,7 +17,7 @@ export const useSocket = () => {
 
   useEffect(() => {
     if (session?.user) {
-      const userId = (session.user as any).id
+      const userId = session.user.id
       const socket = initSocket(userId)
 
       const onConnect = () => {
@@ -253,7 +235,7 @@ export const useSocket = () => {
   const sendMessage = (receiverId: string, content: string) => {
     const socket = getSocket()
     if (socket && isConnected && session?.user) {
-      const userId = (session.user as any).id
+      const userId = session.user.id
       
       // Create optimistic message for instant UI update
       const optimisticMessage: Message = {
@@ -266,8 +248,8 @@ export const useSocket = () => {
         read: false,
         sender: {
           id: userId,
-          name: (session.user as any).name || '',
-          username: (session.user as any).username || '',
+          name: session.user.name,
+          username: session.user.username,
           email: session.user.email || ''
         },
         receiver: {
@@ -287,9 +269,9 @@ export const useSocket = () => {
       socket.emit('sendMessage', { 
         receiverId, 
         content,
-        senderName: (session.user as any).name || '',
-        senderUsername: (session.user as any).username || '',
-        senderEmail: (session.user as any).email || ''
+        senderName: session.user.name,
+        senderUsername: session.user.username,
+        senderEmail: session.user.email || ''
       })
     }
   }

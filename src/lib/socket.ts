@@ -1,8 +1,9 @@
 import { io, Socket } from 'socket.io-client'
+import type { Message } from './types'
 
 interface ServerToClientEvents {
-  newMessage: (message: any) => void
-  messageUpdate: (data: { tempId: string; realMessage: any }) => void
+  newMessage: (message: Message) => void
+  messageUpdate: (data: { tempId: string; realMessage: Message }) => void
   messageError: (data: { tempId: string }) => void
   messageDelivered: (data: { messageId: string; userId: string }) => void
   messageRead: (data: { messageId: string; userId: string; readAt?: string; count?: number }) => void
