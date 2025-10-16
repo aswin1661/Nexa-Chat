@@ -1,5 +1,6 @@
 const { createServer } = require('http')
 const { parse } = require('url')
+const path = require('path')
 const next = require('next')
 const { Server } = require('socket.io')
 const { PrismaClient } = require('@prisma/client')
@@ -8,11 +9,10 @@ const dev = process.env.NODE_ENV !== 'production'
 const hostname = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost'
 const port = process.env.PORT || 3001
 
-const app = next({ dev, hostname, port, dir: __dirname })
+// Use the correct directory
+const appDir = process.cwd()
+const app = next({ dev, hostname, port, dir: appDir })
 const handle = app.getRequestHandler()
-
-// Ensure we're using the correct directory for Next.js
-process.chdir(__dirname)
 
 // Initialize Prisma client with logging configuration
 const prisma = new PrismaClient({
