@@ -11,8 +11,12 @@ const nextConfig: NextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true
   },
-  output: 'standalone',
-  outputFileTracingRoot: process.cwd()
+  distDir: '.next',
+  poweredByHeader: false,
+  generateEtags: false,
+  future: {
+    webpack5: true
+  }
 };
 
 export default nextConfig;
