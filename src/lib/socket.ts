@@ -43,11 +43,26 @@ let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null
 
 export const initSocket = (userId: string): Socket<ServerToClientEvents, ClientToServerEvents> => {
   if (!socket) {
-    socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001', {
+    // Determine the socket URL based on environment
+    let socketUrl: string
+    
+    if (typeof window !== 'undefined') {
+      // Client-side: use the current origin (works for both local and production)
+      socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || window.location.origin
+    } else {
+      // Server-side fallback
+      socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001'
+    }
+    
+    socket = io(socketUrl, {
       query: { userId },
       transports: ['websocket', 'polling'],
       timeout: 20000,
-      forceNew: false
+      forceNew: false,
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 5
     })
 
     socket.on('connect', () => {
@@ -55,16 +70,16 @@ export const initSocket = (userId: string): Socket<ServerToClientEvents, ClientT
       socket?.emit('join', userId)
     })
 
-    socket.on('disconnect', () => {
-      console.log('Disconnected from Socket.IO server')
+    socket.on('disconnect', (reason) => {
+      console.log('Disconnected from Socket.IO server:', reason)
     })
 
     socket.on('connect_error', (error) => {
       console.error('Socket connection error:', error)
-      // Attempt to reconnect after error
-      setTimeout(() => {
-        socket?.connect();
-      }, 5000)
+    })
+
+    socket.on('error', (error) => {
+      console.error('Socket error:', error)
     })
   }
 

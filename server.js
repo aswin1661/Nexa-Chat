@@ -38,7 +38,24 @@ app.prepare().then(() => {
 
   const io = new Server(server, {
     cors: {
-      origin: ['http://localhost:3001', process.env.NEXTAUTH_URL],
+      origin: function(origin, callback) {
+        // Allow all origins in development, restrict in production
+        if (process.env.NODE_ENV !== 'production') {
+          callback(null, true)
+        } else {
+          // In production, allow the app domain
+          const allowedOrigins = [
+            process.env.NEXTAUTH_URL,
+            'https://chatfliq.vercel.app', // Replace with your actual domain
+          ].filter(Boolean)
+          
+          if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true)
+          } else {
+            callback(new Error('CORS policy violation'), false)
+          }
+        }
+      },
       methods: ["GET", "POST"],
       credentials: true
     },
