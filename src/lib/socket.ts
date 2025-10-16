@@ -61,6 +61,10 @@ export const initSocket = (userId: string): Socket<ServerToClientEvents, ClientT
 
     socket.on('connect_error', (error) => {
       console.error('Socket connection error:', error)
+      // Attempt to reconnect after error
+      setTimeout(() => {
+        socket?.connect();
+      }, 5000)
     })
   }
 

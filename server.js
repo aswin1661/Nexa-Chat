@@ -11,10 +11,9 @@ const port = process.env.PORT || 3001
 const app = next({ dev, hostname, port })
 const handle = app.getRequestHandler()
 
-// Initialize Prisma with connection pooling for production
+// Initialize Prisma client with logging configuration
 const prisma = new PrismaClient({
-  log: process.env.NODE_ENV === 'production' ? ['error'] : ['query', 'error', 'warn'],
-  connectionLimit: 20
+  log: process.env.NODE_ENV === 'production' ? ['error'] : ['query', 'error', 'warn']
 })
 
 // Store active user connections and current chats
@@ -36,14 +35,17 @@ app.prepare().then(() => {
 
   const io = new Server(server, {
     cors: {
-      origin: process.env.NEXTAUTH_URL,
+      origin: ['http://localhost:3001', process.env.NEXTAUTH_URL],
       methods: ["GET", "POST"],
       credentials: true
     },
     maxHttpBufferSize: 1e6, // 1 MB
     pingTimeout: 60000,
     pingInterval: 25000,
-    transports: ['websocket', 'polling']
+    transports: ['websocket', 'polling'],
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000
   })
 
   io.on('connection', (socket) => {
