@@ -10,7 +10,9 @@ const nextConfig: NextConfig = {
     // your project has type errors.
     // !! WARN !!
     ignoreBuildErrors: true
-  }
+  },
+  output: 'standalone',
+  outputFileTracingRoot: process.cwd()
 };
 
 export default nextConfig;
