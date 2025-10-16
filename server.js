@@ -7,10 +7,10 @@ const { PrismaClient } = require('@prisma/client')
 
 const dev = process.env.NODE_ENV !== 'production'
 const hostname = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost'
-const port = process.env.PORT || 3001
+const port = parseInt(process.env.PORT || '3001', 10)
 
-// Use the correct directory
-const appDir = process.cwd()
+// Use the correct directory - handle both local and Vercel environments
+const appDir = process.env.NOW_REGION ? process.env.__NEXTAUTH_PROJECT_ROOT || process.cwd() : process.cwd()
 const app = next({ dev, hostname, port, dir: appDir })
 const handle = app.getRequestHandler()
 
